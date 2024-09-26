@@ -1,0 +1,78 @@
+@Library('jenlib') _
+
+pipeline {
+    agent any
+    tools {
+        nodejs 'node-22-9-0'  // Use the Node.js installation configured in Jenkins
+    }
+    stages {
+        stage('Checkout Code') {
+            steps {
+                git branch: 'main', url: 'https://github.com/MuyleangIng/docs-automatex.git'
+            }
+        }
+        stage('Check Node Version') {
+            steps {
+                sh 'node --version'
+            }
+        }
+        stage('Determine Project Type') {
+            steps {
+                script {
+                    // Call checkProjectType once and store the result in an environment variable
+                    env.PROJECT_TYPE = checkProjectType()
+                    echo "Detected project type: ${env.PROJECT_TYPE}"
+                }
+            }
+        }
+        stage('Write Dockerfile') {
+            steps {
+                script {
+                    // Ensure dockerfileType is defined based on PROJECT_TYPE
+                    def dockerfileType = env.PROJECT_TYPE // Adjust as needed based on your logic
+                    
+                    def dockerfileContent = libraryResource("${dockerfileType}-dockerfile")
+                    writeFile file: 'Dockerfilev1', text: dockerfileContent
+                    echo "Dockerfilev1 for ${dockerfileType} has been written to the project root."
+                }
+            }
+        }
+        stage('Run Tests') {
+            steps {
+                sh '''
+                ls -lrt
+                '''
+            }
+        }
+        // Uncomment and adjust the following sections as needed
+        /*
+        stage('Run Tests') {
+            when {
+                expression { env.PROJECT_TYPE == 'desiredType' } // Replace 'desiredType' with your actual condition
+            }
+            steps {
+                script {
+                    runTests(env.PROJECT_TYPE)
+                }
+            }
+        }
+
+        stage('Build Project') {
+            when {
+                expression { env.PROJECT_TYPE == 'desiredType' } // Adjust accordingly
+            }
+            steps {
+                script {
+                    buildProject(env.PROJECT_TYPE)
+                }
+            }
+        }
+        */
+    }
+    post {
+    always {
+        cleanWs()
+    }
+}
+}
+
