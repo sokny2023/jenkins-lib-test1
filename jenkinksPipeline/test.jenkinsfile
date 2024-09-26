@@ -3,7 +3,7 @@
 pipeline {
     agent any
     tools {
-        nodejs 'node-22-9-0'  // Use the Node.js installation configured in Jenkins
+        nodejs 'node:18'  // Use the Node.js installation configured in Jenkins
     }
     stages {
         stage('Checkout Code') {
