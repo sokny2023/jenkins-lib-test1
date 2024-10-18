@@ -152,7 +152,17 @@ pipeline {
                     }
                     """ >> /etc/nginx/sites-available/snake-game.devkh.asia
                     sudo ls -l /etc/nginx/sites-available/
+
+                    sudo ln -s /etc/nginx/sites-available/snake-game.devkh.asia /etc/nginx/sites-enabled/
+                    sudo certbot --nginx -d snake-game.devkh.asia
+
+                    sudo systemctl reload nginx
+
                 '''
+                script{
+                    echo " ----- Welcome to the snake game ------"
+                    echo "  http://snake-game.devkh.asia"
+                }
             }
         }
     }
