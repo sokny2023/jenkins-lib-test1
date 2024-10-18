@@ -3,7 +3,6 @@
 pipeline {
     agent any
 
-
     stages {
 
         stage('Clone Repo') {
@@ -44,8 +43,15 @@ pipeline {
 
         stage('Run Tests') {
             steps {
+                sh 'ls -lrt'
+            }
+        }
+
+        stage('Check Docker and Disk Space') {
+            steps {
                 sh '''
-                ls -lrt
+                df -h
+                docker info
                 '''
             }
         }
@@ -66,9 +72,16 @@ pipeline {
             steps {
                 script {
                     def containerName = 'snake-game-container'
+
+                    // Stop and remove any previous containers with the same name
+                    sh '''
+                    if [ "$(docker ps -aq -f name=snake-game-container)" ]; then
+                        docker rm -f snake-game-container
+                    fi
+                    '''
                     
                     // Run the container on port 9001 and map it to port 80 inside the container
-                    sh "docker run -d --name ${containerName} -p 9001:80 ${repoName}:latest"
+                    sh "docker run -d --name ${containerName} -p 9001:80 snake-game:latest"
                 }
             }
         }
@@ -79,14 +92,14 @@ pipeline {
             }
         }
 
-        stage('check ip:port') {
+        stage('Check Public IP and Port') {
             steps {
-                sh '''
-                curl ifconfig.me
-                '''
+                script {
+                    def publicIp = sh(script: "curl -s ifconfig.me", returnStdout: true).trim()
+                    echo "Application is running at: http://${publicIp}:9001"
+                }
             }
         }
-
     }
 
     post {
