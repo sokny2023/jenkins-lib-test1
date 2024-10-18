@@ -51,7 +51,7 @@ pipeline {
                     def imageName = "${repoName}:latest"
 
                     // Build the Docker image
-                    sh "docker build -t ${imageName} ."
+                    sh "sudo docker build -t ${imageName} ."
                 }
             }
         }
