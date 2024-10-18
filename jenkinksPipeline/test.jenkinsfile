@@ -7,7 +7,7 @@ pipeline {
     stages {
         stage('Checkout Code') {
             steps {
-                git branch: 'main', url: 'https://github.com/MuyleangIng/docs-automatex.git'
+                git branch: 'main', url: 'https://github.com/sokny2023/jenkins-lib-test1.git'
             }
         }
         stage('Check Node Version') {
