@@ -136,6 +136,7 @@ pipeline {
 
                 sh '''
                     sudo touch /etc/nginx/sites-available/snake-game.devkh.asia
+                    sudo chmod 777 /etc/nginx/sites-available/snake-game.devkh.asia
                     echo """ 
                     server {
                         listen 80;
