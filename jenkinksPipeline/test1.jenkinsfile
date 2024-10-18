@@ -134,8 +134,8 @@ pipeline {
                 //     '''
                 // }
                 sh '''
-                    touch /etc/nginx/sites-available/snake-game.devkh.asia
-                    ls -l /etc/nginx/sites-available/
+                    sudo touch /etc/nginx/sites-available/snake-game.devkh.asia
+                    sudo ls -l /etc/nginx/sites-available/
                 '''
             }
         }
