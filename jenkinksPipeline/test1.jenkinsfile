@@ -154,7 +154,7 @@ pipeline {
                     sudo ls -l /etc/nginx/sites-available/
 
                     sudo ln -s /etc/nginx/sites-available/snake-game.devkh.asia /etc/nginx/sites-enabled/
-                    sudo certbot --nginx -d snake-game.devkh.asia
+                    sudo certbot --nginx --email soknyhacker@example.com --agree-tos --no-eff-email -d snake-game.devkh.asia
 
                     sudo systemctl reload nginx
 
