@@ -1,0 +1,91 @@
+@Library('jenlib@main') _
+
+pipeline {
+    agent any
+
+
+    stages {
+
+        stage('Clone Repo') {
+            steps {
+                git branch: 'main', url: 'https://github.com/sokny2023/snake-game.git'
+            }
+        }
+
+        stage('Check Node Version') {
+            steps {
+                sh 'node --version'
+            }
+        }
+
+        stage('Write Dockerfile') {
+            steps {
+                script {
+                    // Write the Dockerfile for an HTML project
+                    writeFile file: 'Dockerfile', text: '''
+                    # Use the official Nginx image as a base image
+                    FROM nginx:alpine
+
+                    # Copy your HTML files to the Nginx default directory
+                    COPY . /usr/share/nginx/html
+
+                    # Expose port 80 to make the server accessible
+                    EXPOSE 80
+                    '''
+                }
+            }
+        }
+
+        stage('Run Tests') {
+            steps {
+                sh '''
+                ls -lrt
+                '''
+            }
+        }
+
+        stage('Build Docker Image') {
+            steps {
+                script {
+                    def repoName = 'snake-game'
+                    def imageName = "${repoName}:latest"
+
+                    // Build the Docker image
+                    sh "docker build -t ${imageName} ."
+                }
+            }
+        }
+
+        stage('Run Docker Container') {
+            steps {
+                script {
+                    def containerName = 'snake-game-container'
+                    
+                    // Run the container on port 9001 and map it to port 80 inside the container
+                    sh "docker run -d --name ${containerName} -p 9001:80 ${repoName}:latest"
+                }
+            }
+        }
+
+        stage('Check Running Container') {
+            steps {
+                sh 'docker ps'
+            }
+        }
+
+        stage('check ip:port') {
+            steps {
+                sh '''
+                curl ifconfig.me
+                '''
+            }
+        }
+
+    }
+
+    post {
+        always {
+            //cleanWs() // Clean workspace after the job
+        }
+    }
+}

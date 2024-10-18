@@ -2,19 +2,22 @@
 
 pipeline {
     agent any
-
+    
 
     stages {
-        stage('Checkout Code') {
+
+        stage('Clone Repo') {
             steps {
                 git branch: 'main', url: 'https://github.com/sokny2023/portfilo-v1.git'
             }
         }
+
         stage('Check Node Version') {
             steps {
                 sh 'node --version'
             }
         }
+
         stage('Determine Project Type') {
             steps {
                 script {
@@ -24,6 +27,7 @@ pipeline {
                 }
             }
         }
+
         stage('Write Dockerfile') {
             steps {
                 script {
@@ -36,6 +40,7 @@ pipeline {
                 }
             }
         }
+
         stage('Run Tests') {
             steps {
                 sh '''
