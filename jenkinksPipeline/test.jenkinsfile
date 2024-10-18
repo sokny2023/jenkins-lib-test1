@@ -7,7 +7,7 @@ pipeline {
     stages {
         stage('Checkout Code') {
             steps {
-                git branch: 'main', url: 'https://github.com/sokny2023/jenkins-lib-test1.git'
+                git branch: 'main', url: 'https://github.com/sokny2023/snake-game.git'
             }
         }
         stage('Check Node Version') {
@@ -43,6 +43,7 @@ pipeline {
                 '''
             }
         }
+        
         // Uncomment and adjust the following sections as needed
         /*
         stage('Run Tests') {
@@ -66,7 +67,7 @@ pipeline {
                 }
             }
         }
-        */
+        
     }
     post {
     always {
