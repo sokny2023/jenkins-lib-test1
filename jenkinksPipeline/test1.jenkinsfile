@@ -18,6 +18,12 @@ pipeline {
             }
         }
 
+        stage('List Files') {
+            steps {
+                sh 'ls -la'
+            }
+        }
+
         stage('Write Dockerfile') {
             steps {
                 script {
