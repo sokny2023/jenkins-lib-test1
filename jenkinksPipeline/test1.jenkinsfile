@@ -155,6 +155,19 @@ pipeline {
     }
 
     post {
+        success {
+            echo "Build successful, the container is running."
+        }
+        failure {
+            script {
+                // If the pipeline fails, stop and remove the container
+                sh '''
+                if [ "$(docker ps -aq -f name=${CONTAINER_NAME})" ]; then
+                    docker rm -f ${CONTAINER_NAME}
+                fi
+                '''
+            }
+        }
         always {
             cleanWs() // Clean workspace after the job
         }
