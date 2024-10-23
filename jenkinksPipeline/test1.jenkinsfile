@@ -140,7 +140,7 @@ pipeline {
                     echo """ 
                     server {
                         listen 80;
-                        server_name snake-game.devkh.asia;
+                        server_name test01.devkh.asia;
 
                         location / {
                             proxy_pass http://localhost:9001/;
