@@ -3,6 +3,11 @@
 pipeline {
     agent any
 
+    parameters {
+        string(name: 'PORT', defaultValue: '9001', description: 'Port to run the container on')
+        string(name: 'DOMAIN_NAME', defaultValue: 'snake-game.devkh.asia', description: 'Domain name for the application')
+    }
+
     stages {
 
         stage('Clone Repo') {
@@ -80,8 +85,8 @@ pipeline {
                     fi
                     '''
                     
-                    // Run the container on port 9001 and map it to port 80 inside the container
-                    sh "docker run -d --name ${containerName} -p 9001:80 snake-game:latest"
+                    // Run the container using the specified port
+                    sh "docker run -d --name ${containerName} -p ${PORT}:80 snake-game:latest"
                 }
             }
         }
@@ -96,72 +101,41 @@ pipeline {
             steps {
                 script {
                     def publicIp = sh(script: "curl -s ifconfig.me", returnStdout: true).trim()
-                    echo "Application is running at: http://${publicIp}:9001"
+                    echo "Application is running at: http://${publicIp}:${PORT}"
                 }
             }
         }
 
         stage('Configure Domain and HTTPS') {
             steps {
-                // script {
-                //     // Write the Nginx configuration for your domain
-                //     writeFile file: '/etc/nginx/sites-available/snake-game.devkh.asia', text: '''
-                //     server {
-                //         listen 80;
-                //         server_name snake-game.devkh.asia;
-
-                //         location / {
-                //             proxy_pass http://localhost:9001/;
-                //             proxy_set_header Host $host;
-                //             proxy_set_header X-Real-IP $remote_addr;
-                //             proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
-                //             proxy_set_header X-Forwarded-Proto $scheme;
-                //         }
-                //     }
-                //     '''
-                    
-                //     // Enable the site by creating a symlink to sites-enabled
-                //     sh '''
-                //     ln -s /etc/nginx/sites-available/snake-game.devkh.asia /etc/nginx/sites-enabled/
-                //     nginx -t  # Test Nginx configuration
-                //     systemctl reload nginx  # Reload Nginx to apply the new configuration
-                //     '''
-
-                //     // Obtain SSL certificate using Certbot
-                //     sh '''
-                //     certbot --nginx -d snake-game.devkh.asia
-                //     systemctl reload nginx
-                //     '''
-                // }
-
-                sh '''
-                    sudo touch /etc/nginx/sites-available/snake-game.devkh.asia
-                    sudo chmod 777 /etc/nginx/sites-available/snake-game.devkh.asia
-                    echo """ 
+                script {
+                    // Write Nginx configuration dynamically based on domain name
+                    def nginxConfig = """
                     server {
                         listen 80;
-                        server_name test01.devkh.asia;
+                        server_name ${DOMAIN_NAME};
 
                         location / {
-                            proxy_pass http://localhost:9001/;
-                            proxy_set_header Host $host;
-                            proxy_set_header X-Real-IP $remote_addr;
-                            proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
-                            proxy_set_header X-Forwarded-Proto $scheme;
+                            proxy_pass http://localhost:${PORT}/;
+                            proxy_set_header Host \$host;
+                            proxy_set_header X-Real-IP \$remote_addr;
+                            proxy_set_header X-Forwarded-For \$proxy_add_x_forwarded_for;
+                            proxy_set_header X-Forwarded-Proto \$scheme;
                         }
                     }
-                    """ >> /etc/nginx/sites-available/snake-game.devkh.asia
-                    sudo ls -l /etc/nginx/sites-available/
+                    """
+                    writeFile file: "/etc/nginx/sites-available/${DOMAIN_NAME}", text: nginxConfig
 
-                    sudo ln -s /etc/nginx/sites-available/snake-game.devkh.asia /etc/nginx/sites-enabled/
-                    sudo certbot --nginx --email soknyhacker@example.com --agree-tos --no-eff-email -d snake-game.devkh.asia
-
+                    // Enable the site and reload Nginx
+                    sh '''
+                    sudo ln -s /etc/nginx/sites-available/${DOMAIN_NAME} /etc/nginx/sites-enabled/
+                    sudo certbot --nginx --email soknyhacker@example.com --agree-tos --no-eff-email -d ${DOMAIN_NAME}
                     sudo systemctl reload nginx
-
-                '''
-                script{
-                    echo " ----- Welcome to the snake game ------"
-                    echo "  http://snake-game.devkh.asia"
+                    '''
+                }
+                script {
+                    echo "----- Welcome to the snake game -----"
+                    echo "Application running at: http://${DOMAIN_NAME}"
                 }
             }
         }
